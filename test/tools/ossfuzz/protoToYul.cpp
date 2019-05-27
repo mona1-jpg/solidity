@@ -19,6 +19,7 @@
 #include <libdevcore/StringUtils.h>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <libyul/Exceptions.h>
+#include <libdevcore/Whiskers.h>
 
 using namespace std;
 using namespace yul::test::yul_fuzzer;
@@ -133,6 +134,12 @@ void ProtoConverter::visit(Expression const& _x)
 	case Expression::kFuncExpr:
 		visit(_x.func_expr());
 		break;
+	case Expression::kDatasize:
+		visit(_x.datasize());
+		break;
+	case Expression::kDataoffset:
+		visit(_x.dataoffset());
+		break;
 	case Expression::EXPR_ONEOF_NOT_SET:
 		m_output << "1";
 		break;
@@ -234,6 +241,8 @@ void ProtoConverter::visit(EmptyVarDecl const&)
 
 void ProtoConverter::visit(MultiVarDecl const& _x)
 {
+	if (m_functionVecMultiReturnValue.size() == 0)
+		return;
 	size_t funcId = (static_cast<size_t>(_x.func_index()) % m_functionVecMultiReturnValue.size());
 
 	int numInParams = m_functionVecMultiReturnValue.at(funcId).first;
@@ -549,6 +558,8 @@ void ProtoConverter::visitFunctionInputParams(T const& _x, unsigned _numInputPar
 
 void ProtoConverter::visit(MultiAssignment const& _x)
 {
+	if (m_functionVecMultiReturnValue.size() == 0)
+		return;
 	size_t funcId = (static_cast<size_t>(_x.func_index()) % m_functionVecMultiReturnValue.size());
 	unsigned numInParams = m_functionVecMultiReturnValue.at(funcId).first;
 	unsigned numOutParams = m_functionVecMultiReturnValue.at(funcId).second;
@@ -590,6 +601,8 @@ void ProtoConverter::visit(MultiAssignment const& _x)
 
 void ProtoConverter::visit(FunctionCallNoReturnVal const& _x)
 {
+	if (m_functionVecNoReturnValue.size() == 0)
+		return;
 	size_t funcId = (static_cast<size_t>(_x.func_index()) % m_functionVecNoReturnValue.size());
 	unsigned numInParams = m_functionVecNoReturnValue.at(funcId);
 	m_output << "foo_" << functionTypeToString(NumFunctionReturns::None) << "_" << funcId;
@@ -600,6 +613,8 @@ void ProtoConverter::visit(FunctionCallNoReturnVal const& _x)
 
 void ProtoConverter::visit(FunctionCallSingleReturnVal const& _x)
 {
+	if (m_functionVecSingleReturnValue.size() == 0)
+		return;
 	size_t funcId = (static_cast<size_t>(_x.func_index()) % m_functionVecSingleReturnValue.size());
 	unsigned numInParams = m_functionVecSingleReturnValue.at(funcId);
 	m_output << "foo_" << functionTypeToString(NumFunctionReturns::Single) << "_" << funcId;
@@ -783,6 +798,59 @@ void ProtoConverter::visit(TerminatingStmt const& _x)
 	}
 }
 
+void ProtoConverter::visit(DataCopy const& _x)
+{
+	m_output << "datacopy(";
+	visit(_x.target());
+	m_output << ", ";
+	visit(_x.source());
+	m_output << ", ";
+	visit(_x.size());
+	m_output << ")\n";
+}
+
+std::string ProtoConverter::getObjectIdentifier(ObjectId const&)
+{
+	// TODO: Infer identifer instead of hard-coding like this
+	return "object0";
+}
+
+void ProtoConverter::visit(DataSize const& _x)
+{
+	m_output << Whiskers(R"(
+	datasize(<id>)
+		)")
+		("id", getObjectIdentifier(_x.identifier()))
+		.render();
+}
+
+void ProtoConverter::visit(DataOffset const& _x)
+{
+	m_output << Whiskers(R"(
+	datasize(<id>)
+		)")
+		("id", getObjectIdentifier(_x.identifier()))
+		.render();
+}
+
+void ProtoConverter::visit(ObjectAccess const& _x)
+{
+	switch (_x.data_funcs_oneof_case())
+	{
+	case ObjectAccess::kCopy:
+		visit(_x.copy());
+		break;
+	case ObjectAccess::kSize:
+		visit(_x.size());
+		break;
+	case ObjectAccess::kOffset:
+		visit(_x.offset());
+		break;
+	case ObjectAccess::DATA_FUNCS_ONEOF_NOT_SET:
+		break;
+	}
+}
+
 void ProtoConverter::visit(Statement const& _x)
 {
 	switch (_x.stmt_oneof_case())
@@ -835,6 +903,9 @@ void ProtoConverter::visit(Statement const& _x)
 		break;
 	case Statement::kFunctioncall:
 		visit(_x.functioncall());
+		break;
+	case Statement::kObjectaccess:
+		visit(_x.objectaccess());
 		break;
 	case Statement::STMT_ONEOF_NOT_SET:
 		break;
@@ -963,6 +1034,32 @@ void ProtoConverter::visit(FunctionDefinition const& _x)
 	m_numFunctionSets++;
 }
 
+void ProtoConverter::visit(Code const& _x)
+{
+	m_output << "code {\n";
+	visit(_x.block());
+	m_output << "}\n";
+}
+
+void ProtoConverter::visit(Data const& _x)
+{
+	m_output << "data \"datablock\" hex\"" << createHex(_x.hex()) << "\"\n";
+}
+
+void ProtoConverter::visit(Object const& _x)
+{
+	// object "object1" {
+	// ...
+	// }
+	m_output << "object \"object" << std::to_string(m_objectId++) << "\" {\n";
+	visit(_x.code());
+	if (_x.has_data())
+		visit(_x.data());
+	if (_x.has_obj())
+		visit(_x.obj());
+	m_output << "}\n";
+}
+
 void ProtoConverter::visit(Program const& _x)
 {
 	/* Program template is as follows
@@ -983,6 +1080,9 @@ void ProtoConverter::visit(Program const& _x)
 
 	for (auto const& f: _x.funcs())
 		visit(f);
+
+//	if (_x.has_obj())
+	visit(_x.obj());
 
 	yulAssert((unsigned)_x.funcs_size() == m_numFunctionSets, "Proto fuzzer: Functions not correctly registered.");
 	m_output << "}\n";

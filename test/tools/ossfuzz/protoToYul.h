@@ -46,6 +46,7 @@ public:
 		m_inForBodyScope = false;
 		m_inForInitScope = false;
 		m_numNestedForLoops = 0;
+		m_objectId = 0;
 	}
 	ProtoConverter(ProtoConverter const&) = delete;
 	ProtoConverter(ProtoConverter&&) = delete;
@@ -82,12 +83,19 @@ private:
 	void visit(RetRevStmt const&);
 	void visit(SelfDestructStmt const&);
 	void visit(TerminatingStmt const&);
+	void visit(ObjectAccess const&);
+	void visit(DataCopy const&);
+	void visit(DataOffset const&);
+	void visit(DataSize const&);
 	void visit(FunctionCallNoReturnVal const&);
 	void visit(FunctionCallSingleReturnVal const&);
 	void visit(FunctionCall const&);
 	void visit(FunctionDefinitionNoReturnVal const&);
 	void visit(FunctionDefinitionSingleReturnVal const&);
 	void visit(FunctionDefinitionMultiReturnVal const&);
+	void visit(Object const&);
+	void visit(Data const&);
+	void visit(Code const&);
 	void visit(Program const&);
 	template <class T>
 	void visit(google::protobuf::RepeatedPtrField<T> const& _repeated_field);
@@ -95,6 +103,7 @@ private:
 
 	std::string createHex(std::string const& _hexBytes) const;
 	std::string createAlphaNum(std::string const& _strBytes) const;
+	std::string getObjectIdentifier(ObjectId const&);
 	bool isCaseLiteralUnique(Literal const&);
 	enum class NumFunctionReturns
 	{
@@ -151,6 +160,8 @@ private:
 	unsigned m_numNestedForLoops;
 	// predicate to keep track of for loop init scope
 	bool m_inForInitScope;
+	/// Index used for naming objects
+	unsigned m_objectId;
 };
 }
 }

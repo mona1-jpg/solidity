@@ -71,7 +71,7 @@ DEFINE_PROTO_FUZZER(Program const& _input)
 	}
 	catch (Exception const&)
 	{
-		return;
+		throw;
 	}
 
 	ostringstream os1;
