@@ -58,6 +58,9 @@ public:
 	/// if possible or nullptr.
 	static FunctionDefinition const* functionCallToDefinition(FunctionCall const& _funCall);
 
+	/// @returns the state variables of a contract including inheritance resolution.
+	static std::vector<VariableDeclaration const*> stateVariables(ContractDefinition const& _contract);
+
 protected:
 	// TODO: Check that we do not have concurrent reads and writes to a variable,
 	// because the order of expression evaluation is undefined

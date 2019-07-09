@@ -132,6 +132,7 @@ private:
 	/// Control-flow.
 	//@{
 	FunctionDefinition const* m_currentFunction = nullptr;
+	ContractDefinition const* m_contract = nullptr;
 	//@}
 
 	/// CHC solver.

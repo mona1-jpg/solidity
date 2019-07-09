@@ -60,6 +60,8 @@ bool CHC::visit(ContractDefinition const& _contract)
 	if (!shouldVisit(_contract))
 		return false;
 
+	m_contract = &_contract;
+
 	reset();
 
 	if (!SMTEncoder::visit(_contract))
@@ -125,6 +127,9 @@ void CHC::endVisit(ContractDefinition const& _contract)
 			m_safeAssertions.insert(target);
 
 	SMTEncoder::endVisit(_contract);
+
+	solAssert(m_contract == &_contract, "");
+	m_contract = nullptr;
 }
 
 bool CHC::visit(FunctionDefinition const& _function)

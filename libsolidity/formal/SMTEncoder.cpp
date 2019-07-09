@@ -40,7 +40,6 @@ bool SMTEncoder::visit(ContractDefinition const& _contract)
 	m_currentContract = &_contract;
 
 	initializeStateVariables(_contract);
-
 	return true;
 }
 
@@ -1375,6 +1374,16 @@ Expression const* SMTEncoder::leftmostBase(IndexAccess const& _indexAccess)
 	while (auto access = dynamic_cast<IndexAccess const*>(base))
 		base = &access->baseExpression();
 	return base;
+}
+
+vector<VariableDeclaration const*> SMTEncoder::stateVariables(ContractDefinition const& _contract)
+{
+	vector<VariableDeclaration const*> stateVars;
+	for (auto const& contract: _contract.annotation().linearizedBaseContracts)
+		for (auto var: contract->stateVariables())
+			if (*contract == _contract || var->isVisibleInDerivedContracts())
+				stateVars.push_back(var);
+	return stateVars;
 }
 
 set<VariableDeclaration const*> SMTEncoder::touchedVariables(ASTNode const& _node)
