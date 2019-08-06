@@ -204,22 +204,23 @@ std::string ProtoConverter::addressValueAsString(unsigned _counter)
 		.render();
 }
 
-/// Returns a hex literal if _isHexLiteral is true, a string literal otherwise.
-std::string ProtoConverter::hexValueAsString(
-	unsigned _width,
+std::string ProtoConverter::croppedString(
+	unsigned _numBytes,
 	unsigned _counter,
 	bool _isHexLiteral
 )
 {
-	// If _width is zero (possible via a call from ...), then simply return an
-	// empty (hex) string
-	if (_width == 0)
-		return Whiskers(R"(<?addHexPrefix>hex</addHexPrefix>"")")
-			("addHexPrefix", _isHexLiteral)
-			.render();
+	// _numBytes can not be zero or exceed 32 bytes
+	solAssert(
+		_numBytes > 0 && _numBytes <= 32,
+		"Proto ABIv2 fuzzer: Too short or too long a cropped string"
+	);
 
-	// Masked value must contain twice the number of nibble "f"'s as _width
-	unsigned numMaskNibbles = _width * 2;
+	// Number of masked nibbles is twice the number of bytes for a
+	// hex literal of _numBytes bytes. For a string literal, each nibble
+	// is treated as a character.
+	unsigned numMaskNibbles = _isHexLiteral ? _numBytes * 2 : _numBytes;
+
 	// Start position of substring equals totalHexStringLength - numMaskNibbles
 	// totalHexStringLength = 64 + 2 = 66
 	// e.g., 0x12345678901234567890123456789012 is a total of 66 characters
@@ -228,14 +229,96 @@ std::string ProtoConverter::hexValueAsString(
 	//      <-----------total length --------->
 	// Note: This assumes that maskUnsignedIntToHex() invokes toHex(..., HexPrefix::Add)
 	unsigned startPos = 66 - numMaskNibbles;
+	// Extracts the least significant numMaskNibbles from the result
+	// of maskUnsignedIntToHex().
+	return maskUnsignedIntToHex(
+		_counter,
+		numMaskNibbles
+	).substr(startPos, numMaskNibbles);
+}
 
-	// Extracts the least significant numMaskNibbles from the result of "maskUnsignedIntToHex",
-	// and replaces "0x" with "hex\"...\"" string.
+std::string ProtoConverter::hexValueAsString(
+	unsigned _numBytes,
+	unsigned _counter,
+	bool _isHexLiteral,
+	bool _decorate
+)
+{
+	solAssert(_numBytes <= 32, "Proto ABIv2 fuzzer: Invalid hex length");
+
+	// If _decorate is set, then we return a hex"" or a "" string.
+	if (_numBytes == 0)
+		return Whiskers(R"(<?decorate><?isHex>hex</isHex>""</decorate>)")
+			("decorate", _decorate)
+			("isHex", _isHexLiteral)
+			.render();
+
 	// This is needed because solidity interprets a 20-byte 0x prefixed hex literal as an address
 	// payable type.
-	return Whiskers(R"(<?addHexPrefix>hex</addHexPrefix>"<value>")")
-		("addHexPrefix", _isHexLiteral)
-		("value", maskUnsignedIntToHex(_counter, numMaskNibbles).substr(startPos, numMaskNibbles))
+	return Whiskers(R"(<?decorate><?isHex>hex</isHex>"</decorate><value><?decorate>"</decorate>)")
+		("decorate", _decorate)
+		("isHex", _isHexLiteral)
+		("value", croppedString(_numBytes, _counter, _isHexLiteral))
+		.render();
+}
+
+std::string ProtoConverter::variableLengthHexValueAsString(
+	unsigned _numBytes,
+	unsigned _counter,
+	bool _isHexLiteral
+)
+{
+	solAssert(_numBytes >= 0, "Proto ABIv2 fuzzer: Invalid hex length");
+	if (_numBytes == 0)
+		return Whiskers(R"(<?isHex>hex</isHex>"")")
+			("isHex", _isHexLiteral)
+			.render();
+
+	// Since we create a larger literal by duplicating the first
+	// 32 bytes, we can cache it. This saves us expensive calls
+	// to keccak256.
+	unsigned batchSize = _numBytes >= 32 ? 32 : _numBytes;
+	std::string cachedString = hexValueAsString(
+		batchSize,
+		_counter,
+		/*isHexLiteral=*/_isHexLiteral,
+		/*decorate=*/false
+	);
+	_numBytes -= batchSize;
+	std::string output = cachedString;
+	// Check if size of cached string meets expectations
+	bool sanityCheck = false;
+	if (_numBytes > 0)
+		sanityCheck = _isHexLiteral ?
+			cachedString.size() == 64 :
+			cachedString.size() == 32;
+
+	solAssert(
+		_numBytes == 0 || sanityCheck,
+		"Proto ABIv2 fuzzer: Logic flaw in variable literal creation"
+	);
+
+	// Append cached literal until we are able to produce an
+	// output string that is _numBytes in size.
+	while (_numBytes > 0)
+	{
+		batchSize = _numBytes >= 32 ? 32 : _numBytes;
+		output += cachedString.substr(
+			0,
+			// Double the substring length for hex literals since each
+			// character is actually half a byte.
+			_isHexLiteral ? batchSize * 2 : batchSize
+		);
+		_numBytes -= batchSize;
+	}
+
+	solAssert(_numBytes == 0,
+		"Proto ABIv2 fuzzer: Logic flaw in variable literal creation"
+	);
+	// Decorate output
+	return Whiskers(R"(<?isHexLiteral>hex</isHexLiteral>"<value>")")
+		("isHexLiteral", _isHexLiteral)
+		("value", output)
 		.render();
 }
 
