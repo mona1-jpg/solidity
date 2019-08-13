@@ -67,13 +67,13 @@ bool TypeChecker::checkTypeRequirements(ASTNode const& _contract)
 	return Error::containsOnlyWarnings(m_errorReporter.errors());
 }
 
-TypePointer const& TypeChecker::type(Expression const& _expression) const
+TypePointer const& TypeChecker::type(Expression const& _expression)
 {
 	solAssert(!!_expression.annotation().type, "Type requested but not present.");
 	return _expression.annotation().type;
 }
 
-TypePointer const& TypeChecker::type(VariableDeclaration const& _variable) const
+TypePointer const& TypeChecker::type(VariableDeclaration const& _variable)
 {
 	solAssert(!!_variable.annotation().type, "Type requested but not present.");
 	return _variable.annotation().type;
@@ -2510,52 +2510,57 @@ bool TypeChecker::expectType(Expression const& _expression, Type const& _expecte
 	return true;
 }
 
+namespace {
+
+char const* findReasonForInvalidWrite(Expression const& _expression)
+{
+	if (_expression.annotation().isConstant)
+		return "Cannot assign to a constant variable.";
+
+	if (auto indexAccess = dynamic_cast<IndexAccess const*>(&_expression))
+	{
+		if (TypeChecker::type(indexAccess->baseExpression())->category() == Type::Category::FixedBytes)
+			return "Single bytes in fixed bytes arrays cannot be modified.";
+		else if (auto arrayType = dynamic_cast<ArrayType const*>(TypeChecker::type(indexAccess->baseExpression())))
+			if (arrayType->dataStoredIn(DataLocation::CallData))
+				return "Calldata arrays are read-only.";
+	}
+
+	if (auto memberAccess = dynamic_cast<MemberAccess const*>(&_expression))
+	{
+		if (auto structType = dynamic_cast<StructType const*>(TypeChecker::type(memberAccess->expression())))
+		{
+			if (structType->dataStoredIn(DataLocation::CallData))
+				return "Calldata structs are read-only.";
+		}
+		else if (auto arrayType = dynamic_cast<ArrayType const*>(TypeChecker::type(memberAccess->expression())))
+			if (memberAccess->memberName() == "length")
+				switch (arrayType->location())
+				{
+					case DataLocation::Memory:
+						return "Memory arrays cannot be resized.";
+					case DataLocation::CallData:
+						return "Calldata arrays cannot be resized.";
+					case DataLocation::Storage:
+						break;
+				}
+	}
+
+	if (auto identifier = dynamic_cast<Identifier const*>(&_expression))
+		if (auto varDecl = dynamic_cast<VariableDeclaration const*>(identifier->annotation().referencedDeclaration))
+			if (varDecl->isExternalCallableParameter() && dynamic_cast<ReferenceType const*>(identifier->annotation().type))
+				return "External function arguments of reference type are read-only.";
+
+	return "Expression has to be an lvalue.";
+}
+
+}
+
 void TypeChecker::requireLValue(Expression const& _expression)
 {
 	_expression.annotation().lValueRequested = true;
 	_expression.accept(*this);
 
-	if (_expression.annotation().isLValue)
-		return;
-
-	m_errorReporter.typeError(_expression.location(), [&]() {
-		if (_expression.annotation().isConstant)
-			return "Cannot assign to a constant variable.";
-
-		if (auto indexAccess = dynamic_cast<IndexAccess const*>(&_expression))
-		{
-			if (type(indexAccess->baseExpression())->category() == Type::Category::FixedBytes)
-				return "Single bytes in fixed bytes arrays cannot be modified.";
-			else if (auto arrayType = dynamic_cast<ArrayType const*>(type(indexAccess->baseExpression())))
-				if (arrayType->dataStoredIn(DataLocation::CallData))
-					return "Calldata arrays are read-only.";
-		}
-
-		if (auto memberAccess = dynamic_cast<MemberAccess const*>(&_expression))
-		{
-			if (auto structType = dynamic_cast<StructType const*>(type(memberAccess->expression())))
-			{
-				if (structType->dataStoredIn(DataLocation::CallData))
-					return "Calldata structs are read-only.";
-			}
-			else if (auto arrayType = dynamic_cast<ArrayType const*>(type(memberAccess->expression())))
-				if (memberAccess->memberName() == "length")
-					switch (arrayType->location())
-					{
-						case DataLocation::Memory:
-							return "Memory arrays cannot be resized.";
-						case DataLocation::CallData:
-							return "Calldata arrays cannot be resized.";
-						case DataLocation::Storage:
-							break;
-					}
-		}
-
-		if (auto identifier = dynamic_cast<Identifier const*>(&_expression))
-			if (auto varDecl = dynamic_cast<VariableDeclaration const*>(identifier->annotation().referencedDeclaration))
-				if (varDecl->isExternalCallableParameter() && dynamic_cast<ReferenceType const*>(identifier->annotation().type))
-					return "External function arguments of reference type are read-only.";
-
-		return "Expression has to be an lvalue.";
-	}());
+	if (!_expression.annotation().isLValue)
+		m_errorReporter.typeError(_expression.location(), findReasonForInvalidWrite(_expression));
 }

@@ -58,10 +58,10 @@ public:
 	bool checkTypeRequirements(ASTNode const& _contract);
 
 	/// @returns the type of an expression and asserts that it is present.
-	TypePointer const& type(Expression const& _expression) const;
+	static TypePointer const& type(Expression const& _expression);
 	/// @returns the type of the given variable and throws if the type is not present
 	/// (this can happen for variables with non-explicit types before their types are resolved)
-	TypePointer const& type(VariableDeclaration const& _variable) const;
+	static TypePointer const& type(VariableDeclaration const& _variable);
 
 	static bool typeSupportedByOldABIEncoder(Type const& _type, bool _isLibraryCall);
 
