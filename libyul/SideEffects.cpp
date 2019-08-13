@@ -33,7 +33,6 @@ using namespace std;
 using namespace dev;
 using namespace yul;
 
-
 SideEffectsCollector::SideEffectsCollector(Dialect const& _dialect, Expression const& _expression):
 	SideEffectsCollector(_dialect)
 {
@@ -56,7 +55,16 @@ void SideEffectsCollector::operator()(FunctionalInstruction const& _instr)
 {
 	ASTWalker::operator()(_instr);
 
-	m_sideEffects += EVMDialect::sideEffectsOfInstruction(_instr.instruction);
+	if (!eth::SemanticInformation::movable(_instr.instruction))
+		m_sideEffects.movable = false;
+	if (!eth::SemanticInformation::sideEffectFree(_instr.instruction))
+		m_sideEffectFree = false;
+	if (!eth::SemanticInformation::sideEffectFreeIfNoMSize(_instr.instruction))
+		m_sideEffectFreeIfNoMSize = false;
+	if (eth::SemanticInformation::invalidatesStorage(_instr.instruction))
+		m_invalidatesStorage = true;
+	if (eth::SemanticInformation::invalidatesMemory(_instr.instruction))
+		m_invalidatesMemory = true;
 }
 
 void SideEffectsCollector::operator()(FunctionCall const& _functionCall)
@@ -64,9 +72,26 @@ void SideEffectsCollector::operator()(FunctionCall const& _functionCall)
 	ASTWalker::operator()(_functionCall);
 
 	if (BuiltinFunction const* f = m_dialect.builtin(_functionCall.functionName.name))
-		m_sideEffects += f->sideEffects;
+	{
+		if (!f->movable)
+			m_movable = false;
+		if (!f->sideEffectFree)
+			m_sideEffectFree = false;
+		if (!f->sideEffectFreeIfNoMSize)
+			m_sideEffectFreeIfNoMSize = false;
+		if (f->invalidatesStorage)
+			m_invalidatesStorage = true;
+		if (f->invalidatesMemory)
+			m_invalidatesMemory = true;
+	}
 	else
-		m_sideEffects += SideEffects::worst();
+	{
+		m_movable = false;
+		m_sideEffectFree = false;
+		m_sideEffectFreeIfNoMSize = false;
+		m_invalidatesStorage = true;
+		m_invalidatesMemory = true;
+	}
 }
 
 bool MSizeFinder::containsMSize(Dialect const& _dialect, Block const& _ast)
