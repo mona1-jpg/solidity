@@ -39,6 +39,7 @@
 					"attributes" : 
 					{
 						"constant" : false,
+						"isOverriding" : false,
 						"name" : "m",
 						"scope" : 37,
 						"stateVariable" : true,
@@ -93,6 +94,7 @@
 						"documentation" : null,
 						"implemented" : true,
 						"isConstructor" : false,
+						"isOverriding" : false,
 						"kind" : "function",
 						"modifiers" : 
 						[
@@ -113,6 +115,7 @@
 									"attributes" : 
 									{
 										"constant" : false,
+										"isOverriding" : false,
 										"name" : "arg",
 										"scope" : 36,
 										"stateVariable" : false,
@@ -151,6 +154,7 @@
 									"attributes" : 
 									{
 										"constant" : false,
+										"isOverriding" : false,
 										"name" : "r",
 										"scope" : 36,
 										"stateVariable" : false,
@@ -199,6 +203,7 @@
 											"attributes" : 
 											{
 												"constant" : false,
+												"isOverriding" : false,
 												"name" : "a",
 												"scope" : 35,
 												"stateVariable" : false,
@@ -351,6 +356,7 @@
 											"attributes" : 
 											{
 												"constant" : false,
+												"isOverriding" : false,
 												"name" : "c",
 												"scope" : 35,
 												"stateVariable" : false,

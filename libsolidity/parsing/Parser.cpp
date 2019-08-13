@@ -417,6 +417,7 @@ Parser::FunctionHeaderParserResult Parser::parseFunctionHeader(bool _forceEmptyN
 	FunctionHeaderParserResult result;
 
 	result.isConstructor = false;
+	result.isOverriding = false;
 
 	if (m_scanner->currentToken() == Token::Constructor)
 		result.isConstructor = true;
@@ -493,6 +494,15 @@ Parser::FunctionHeaderParserResult Parser::parseFunctionHeader(bool _forceEmptyN
 			else
 				result.stateMutability = parseStateMutability();
 		}
+		else if (token == Token::Override)
+		{
+			if (result.isOverriding)
+				parserError("Override already specified.");
+			else
+				result.isOverriding = true;
+
+			m_scanner->next();
+		}
 		else
 			break;
 	}
@@ -540,6 +550,7 @@ ASTPointer<ASTNode> Parser::parseFunctionDefinitionOrFunctionTypeStateVariable()
 			header.visibility,
 			header.stateMutability,
 			header.isConstructor,
+			header.isOverriding,
 			docstring,
 			header.parameters,
 			header.modifiers,
@@ -637,6 +648,7 @@ ASTPointer<VariableDeclaration> Parser::parseVariableDeclaration(
 	}
 	bool isIndexed = false;
 	bool isDeclaredConst = false;
+	bool isOverriding = false;
 	Declaration::Visibility visibility(Declaration::Visibility::Default);
 	VariableDeclaration::Location location = VariableDeclaration::Location::Unspecified;
 	ASTPointer<ASTString> identifier;
@@ -658,6 +670,15 @@ ASTPointer<VariableDeclaration> Parser::parseVariableDeclaration(
 			}
 			else
 				visibility = parseVisibilitySpecifier();
+		}
+		else if (_options.isStateVariable && token == Token::Override)
+		{
+			if (isOverriding)
+				parserError("Override already specified.");
+			else
+				isOverriding = true;
+
+			m_scanner->next();
 		}
 		else
 		{
@@ -724,6 +745,7 @@ ASTPointer<VariableDeclaration> Parser::parseVariableDeclaration(
 		_options.isStateVariable,
 		isIndexed,
 		isDeclaredConst,
+		isOverriding,
 		location
 	);
 }

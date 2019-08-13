@@ -39,6 +39,7 @@
 					"attributes" : 
 					{
 						"constant" : false,
+						"isOverriding" : false,
 						"name" : "i",
 						"scope" : 4,
 						"stateVariable" : true,

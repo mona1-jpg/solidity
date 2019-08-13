@@ -108,6 +108,7 @@
 						"documentation" : "Some comment on fn.",
 						"implemented" : true,
 						"isConstructor" : false,
+						"isOverriding" : false,
 						"kind" : "function",
 						"modifiers" : 
 						[

@@ -37,6 +37,7 @@
 					"documentation" : null,
 					"id" : 4,
 					"implemented" : true,
+					"isOverriding" : false,
 					"kind" : "fallback",
 					"modifiers" : [],
 					"name" : "",

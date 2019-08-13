@@ -39,6 +39,7 @@
 					"attributes" : 
 					{
 						"constant" : false,
+						"isOverriding" : false,
 						"name" : "a",
 						"scope" : 14,
 						"stateVariable" : true,
@@ -83,6 +84,7 @@
 						"documentation" : null,
 						"implemented" : true,
 						"isConstructor" : false,
+						"isOverriding" : false,
 						"kind" : "function",
 						"modifiers" : 
 						[
@@ -139,6 +141,7 @@
 											"attributes" : 
 											{
 												"constant" : false,
+												"isOverriding" : false,
 												"name" : "b",
 												"scope" : 12,
 												"stateVariable" : false,

@@ -29,6 +29,7 @@
 				{
 					"constant" : false,
 					"id" : 3,
+					"isOverriding" : false,
 					"name" : "i",
 					"nodeType" : "VariableDeclaration",
 					"scope" : 4,

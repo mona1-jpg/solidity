@@ -44,6 +44,7 @@
 									{
 										"constant" : false,
 										"id" : 4,
+										"isOverriding" : false,
 										"name" : "a",
 										"nodeType" : "VariableDeclaration",
 										"scope" : 9,
@@ -142,6 +143,7 @@
 					"documentation" : null,
 					"id" : 10,
 					"implemented" : true,
+					"isOverriding" : false,
 					"kind" : "function",
 					"modifiers" : [],
 					"name" : "f",

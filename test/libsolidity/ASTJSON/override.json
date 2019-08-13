@@ -1,0 +1,150 @@
+{
+	"absolutePath" : "a",
+	"exportedSymbols" : 
+	{
+		"B" : 
+		[
+			4
+		],
+		"C" : 
+		[
+			11
+		]
+	},
+	"id" : 12,
+	"nodeType" : "SourceUnit",
+	"nodes" : 
+	[
+		{
+			"baseContracts" : [],
+			"contractDependencies" : [],
+			"contractKind" : "contract",
+			"documentation" : null,
+			"fullyImplemented" : false,
+			"id" : 4,
+			"linearizedBaseContracts" : 
+			[
+				4
+			],
+			"name" : "B",
+			"nodeType" : "ContractDefinition",
+			"nodes" : 
+			[
+				{
+					"body" : null,
+					"documentation" : null,
+					"id" : 3,
+					"implemented" : false,
+					"isOverriding" : false,
+					"kind" : "function",
+					"modifiers" : [],
+					"name" : "foo",
+					"nodeType" : "FunctionDefinition",
+					"parameters" : 
+					{
+						"id" : 1,
+						"nodeType" : "ParameterList",
+						"parameters" : [],
+						"src" : "26:2:1"
+					},
+					"returnParameters" : 
+					{
+						"id" : 2,
+						"nodeType" : "ParameterList",
+						"parameters" : [],
+						"src" : "35:0:1"
+					},
+					"scope" : 4,
+					"src" : "14:22:1",
+					"stateMutability" : "nonpayable",
+					"superFunction" : null,
+					"visibility" : "public"
+				}
+			],
+			"scope" : 12,
+			"src" : "0:38:1"
+		},
+		{
+			"baseContracts" : 
+			[
+				{
+					"arguments" : null,
+					"baseName" : 
+					{
+						"contractScope" : null,
+						"id" : 5,
+						"name" : "B",
+						"nodeType" : "UserDefinedTypeName",
+						"referencedDeclaration" : 4,
+						"src" : "53:1:1",
+						"typeDescriptions" : 
+						{
+							"typeIdentifier" : "t_contract$_B_$4",
+							"typeString" : "contract B"
+						}
+					},
+					"id" : 6,
+					"nodeType" : "InheritanceSpecifier",
+					"src" : "53:1:1"
+				}
+			],
+			"contractDependencies" : 
+			[
+				4
+			],
+			"contractKind" : "contract",
+			"documentation" : null,
+			"fullyImplemented" : true,
+			"id" : 11,
+			"linearizedBaseContracts" : 
+			[
+				11,
+				4
+			],
+			"name" : "C",
+			"nodeType" : "ContractDefinition",
+			"nodes" : 
+			[
+				{
+					"body" : 
+					{
+						"id" : 9,
+						"nodeType" : "Block",
+						"src" : "89:4:1",
+						"statements" : []
+					},
+					"documentation" : null,
+					"id" : 10,
+					"implemented" : true,
+					"isOverriding" : true,
+					"kind" : "function",
+					"modifiers" : [],
+					"name" : "foo",
+					"nodeType" : "FunctionDefinition",
+					"parameters" : 
+					{
+						"id" : 7,
+						"nodeType" : "ParameterList",
+						"parameters" : [],
+						"src" : "70:2:1"
+					},
+					"returnParameters" : 
+					{
+						"id" : 8,
+						"nodeType" : "ParameterList",
+						"parameters" : [],
+						"src" : "89:0:1"
+					},
+					"scope" : 11,
+					"src" : "58:35:1",
+					"stateMutability" : "nonpayable",
+					"superFunction" : 3,
+					"visibility" : "public"
+				}
+			],
+			"scope" : 12,
+			"src" : "39:56:1"
+		}
+	],
+	"src" : "0:96:1"
+}

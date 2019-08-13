@@ -71,6 +71,7 @@ private:
 	struct FunctionHeaderParserResult
 	{
 		bool isConstructor;
+		bool isOverriding;
 		ASTPointer<ASTString> name;
 		ASTPointer<ParameterList> parameters;
 		ASTPointer<ParameterList> returnParameters;

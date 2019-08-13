@@ -51,6 +51,7 @@
 									"attributes" : 
 									{
 										"constant" : false,
+										"isOverriding" : false,
 										"name" : "i",
 										"scope" : 6,
 										"stateVariable" : false,
@@ -105,6 +106,7 @@
 						"documentation" : null,
 						"implemented" : true,
 						"isConstructor" : false,
+						"isOverriding" : false,
 						"kind" : "function",
 						"name" : "F",
 						"scope" : 14,

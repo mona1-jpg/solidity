@@ -147,6 +147,7 @@
 					"documentation" : "Some comment on fn.",
 					"id" : 14,
 					"implemented" : true,
+					"isOverriding" : false,
 					"kind" : "function",
 					"modifiers" : [],
 					"name" : "fn",

@@ -29,6 +29,7 @@
 				{
 					"constant" : false,
 					"id" : 4,
+					"isOverriding" : false,
 					"name" : "m",
 					"nodeType" : "VariableDeclaration",
 					"scope" : 37,
@@ -97,6 +98,7 @@
 									{
 										"constant" : false,
 										"id" : 12,
+										"isOverriding" : false,
 										"name" : "a",
 										"nodeType" : "VariableDeclaration",
 										"scope" : 35,
@@ -237,6 +239,7 @@
 									{
 										"constant" : false,
 										"id" : 22,
+										"isOverriding" : false,
 										"name" : "c",
 										"nodeType" : "VariableDeclaration",
 										"scope" : 35,
@@ -463,6 +466,7 @@
 					"documentation" : null,
 					"id" : 36,
 					"implemented" : true,
+					"isOverriding" : false,
 					"kind" : "function",
 					"modifiers" : [],
 					"name" : "f",
@@ -476,6 +480,7 @@
 							{
 								"constant" : false,
 								"id" : 6,
+								"isOverriding" : false,
 								"name" : "arg",
 								"nodeType" : "VariableDeclaration",
 								"scope" : 36,
@@ -515,6 +520,7 @@
 							{
 								"constant" : false,
 								"id" : 9,
+								"isOverriding" : false,
 								"name" : "r",
 								"nodeType" : "VariableDeclaration",
 								"scope" : 36,

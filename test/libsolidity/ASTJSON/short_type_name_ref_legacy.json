@@ -41,6 +41,7 @@
 						"documentation" : null,
 						"implemented" : true,
 						"isConstructor" : false,
+						"isOverriding" : false,
 						"kind" : "function",
 						"modifiers" : 
 						[
@@ -98,6 +99,7 @@
 											"attributes" : 
 											{
 												"constant" : false,
+												"isOverriding" : false,
 												"name" : "rows",
 												"scope" : 9,
 												"stateVariable" : false,

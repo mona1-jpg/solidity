@@ -41,6 +41,7 @@
 						"documentation" : null,
 						"implemented" : true,
 						"isConstructor" : false,
+						"isOverriding" : false,
 						"kind" : "fallback",
 						"modifiers" : 
 						[

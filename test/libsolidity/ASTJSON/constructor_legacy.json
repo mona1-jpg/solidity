@@ -41,6 +41,7 @@
 						"documentation" : null,
 						"implemented" : true,
 						"isConstructor" : true,
+						"isOverriding" : false,
 						"kind" : "constructor",
 						"modifiers" : 
 						[
